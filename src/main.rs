@@ -3,12 +3,26 @@ use std::path::Path;
 
 fn main() {
     let mut arguments = std::env::args().skip(1);
-    let key = arguments.next().expect("Key not found");
-    let value = arguments.next().expect("Value not found");
     
+    let action = arguments.next().expect("Action not passed");
     let mut database = Database::new().unwrap();
-    database.insert(key, value.clone());
-    database.flush().expect("Failed to flush database");
+
+    match action.as_str() {
+        "insert" => {
+            let key = arguments.next().expect("Key not passed");
+            let value = arguments.next().expect("Value not passed");
+            database.insert(key, value)
+        },
+        "get" => {
+            let key = arguments.next().expect("Key not passed");
+            database.get(key)
+        },
+        "delete" => {
+            let key = arguments.next().expect("Key not passed");
+            database.delete(key)
+        }
+        &_ => todo!()
+    }
 }
 
 struct Database {
@@ -41,7 +55,16 @@ impl Database {
         self.map.insert(key, value);
     }
 
-    fn flush(self) -> Result<(), std::io::Error> {
+    fn get(&self, key: String) {
+        let value = self.map.get(&key);
+        println!("{:?}", value)
+    }
+
+    fn delete(&mut self, key: String) {
+        self.map.remove(key.as_str());
+    }
+
+    fn flush(&self) -> Result<(), std::io::Error> {
         let mut contents = String::new();
         for (key, val) in &self.map {
             contents.push_str(key);
@@ -52,4 +75,11 @@ impl Database {
         std::fs::write("kv.db", contents)
     }
 
+}
+
+
+impl Drop for Database {
+    fn drop(&mut self) {
+        self.flush().unwrap()
+    }
 }
