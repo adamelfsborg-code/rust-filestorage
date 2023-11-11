@@ -49,7 +49,7 @@ impl Database {
             contents.push_str(val);
             contents.push('\n');
         }
-        std::fs::write("kv2.db", contents)
+        std::fs::write("kv.db", contents)
     }
 
 }
