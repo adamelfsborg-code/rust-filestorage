@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+const FILE_NAME: &str = "kv.db";
+
 fn main() {
     let mut arguments = std::env::args().skip(1);
     
@@ -33,13 +35,13 @@ impl Database {
     fn new() -> Result<Database, std::io::Error> {
         let mut map = HashMap::new();
 
-        let file_not_exists = Path::new("kv.db").exists();
+        let file_not_exists = Path::new(FILE_NAME).exists();
 
         if file_not_exists != true {
             return Ok(Database { map })
         }
 
-        let contents = std::fs::read_to_string("kv.db")?;
+        let contents = std::fs::read_to_string(FILE_NAME)?;
         for line in contents.lines() {
             let mut chunk = line.splitn(2, '\t');
             let key = chunk.next().expect("Key not found");
@@ -72,7 +74,7 @@ impl Database {
             contents.push_str(val);
             contents.push('\n');
         }
-        std::fs::write("kv.db", contents)
+        std::fs::write(FILE_NAME, contents)
     }
 
 }
